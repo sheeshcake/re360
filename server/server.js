@@ -27,82 +27,83 @@ app.use(cors());
 app.use(express.json());
 app.use(router);
 
-app.get('/', (req, res) => {
+
+app.get('api/', (req, res) => {
     res.send('Hello World!');
 })
 
 // Auth
-router.post('/signup', authController.createRealtor);
-router.post('/login', authController.login);
-router.post('/refresh', authController.refresh);
+router.post('api/signup', authController.createRealtor);
+router.post('api/login', authController.login);
+router.post('api/refresh', authController.refresh);
 
 // User
-router.get('/user', authenticateToken, userController.getUser)
-router.patch('/user', authenticateToken, userController.updateUser)
-router.delete('/user', authenticateToken, userController.deleteUser)
+router.get('api/user', authenticateToken, userController.getUser)
+router.patch('api/user', authenticateToken, userController.updateUser)
+router.delete('api/user', authenticateToken, userController.deleteUser)
 
 // Messages
-router.get('/messages', authenticateToken, messageController.getMessages)
-router.post('/messages', authenticateToken, messageController.createMessage)
+router.get('api/messages', authenticateToken, messageController.getMessages)
+router.post('api/messages', authenticateToken, messageController.createMessage)
 
 // Misc
-router.post('/currency', authenticateToken, miscController.setCurrency)
+router.post('api/currency', authenticateToken, miscController.setCurrency)
 
 
 // Properties
-router.get('/properties', authenticateToken, realEstateController.getProperties)
-router.post('/properties', authenticateToken, realEstateController.createProperty)
-router.get('/properties/:id', authenticateToken, realEstateController.getProperty)
-router.delete('/properties/:id', authenticateToken, realEstateController.deleteProperty)
+router.get('api/properties', authenticateToken, realEstateController.getProperties)
+router.post('api/properties', authenticateToken, realEstateController.createProperty)
+router.get('api/properties/:id', authenticateToken, realEstateController.getProperty)
+router.delete('api/properties/:id', authenticateToken, realEstateController.deleteProperty)
 
 // Units / Rentals
-router.get('/units', authenticateToken, realEstateController.getUnits)
-router.get('/units/:id', authenticateToken, realEstateController.getUnit)
-router.patch('/units/:id', authenticateToken, realEstateController.updateUnit)
-router.put('/units/:id/tenant', authenticateToken, tenantController.assignTenantToUnit)
+router.get('api/units', authenticateToken, realEstateController.getUnits)
+router.get('api/units/:id', authenticateToken, realEstateController.getUnit)
+router.patch('api/units/:id', authenticateToken, realEstateController.updateUnit)
+router.put('api/units/:id/tenant', authenticateToken, tenantController.assignTenantToUnit)
 
 // Leases
-router.get('/leases', authenticateToken, leaseController.getLeases)
-router.get('/leases/:id', authenticateToken, leaseController.getLease)
-router.patch('/leases/:id', authenticateToken, leaseController.updateLease)
-router.delete('/leases/:id', authenticateToken, leaseController.deleteLease)
-router.post('/leases', authenticateToken, leaseController.createLease)
+router.get('api/leases', authenticateToken, leaseController.getLeases)
+router.get('api/leases/:id', authenticateToken, leaseController.getLease)
+router.patch('api/leases/:id', authenticateToken, leaseController.updateLease)
+router.delete('api/leases/:id', authenticateToken, leaseController.deleteLease)
+router.post('api/leases', authenticateToken, leaseController.createLease)
 
 // Tenants
-router.get('/tenants', authenticateToken, tenantController.getTenants)
-router.post('/tenants', authenticateToken, tenantController.createTenant)
-router.get('/tenants/:id', authenticateToken, tenantController.getTenant)
-router.delete('/tenants/:id', authenticateToken, tenantController.deleteTenant)
-router.put('/tenants/:id', authenticateToken, tenantController.updateTenant)
+router.get('api/tenants', authenticateToken, tenantController.getTenants)
+router.post('api/tenants', authenticateToken, tenantController.createTenant)
+router.get('api/tenants/:id', authenticateToken, tenantController.getTenant)
+router.delete('api/tenants/:id', authenticateToken, tenantController.deleteTenant)
+router.put('api/tenants/:id', authenticateToken, tenantController.updateTenant)
 
 // Payments
-router.post('/payments', authenticateToken, paymentController.createPayment)
-router.get('/payments', authenticateToken, paymentController.getPayments)
-router.put('/payments/:id', authenticateToken, paymentController.updatePayment)
-router.delete('/payments/:id', authenticateToken, paymentController.deletePayment)
+router.post('api/payments', authenticateToken, paymentController.createPayment)
+router.get('api/payments', authenticateToken, paymentController.getPayments)
+router.put('api/payments/:id', authenticateToken, paymentController.updatePayment)
+router.delete('api/payments/:id', authenticateToken, paymentController.deletePayment)
 
 // Lease Payment Schedules
-router.put('/payment-schedules/:id', authenticateToken, paymentController.updatePaymentSchedule)
-router.delete('/payment-schedules/:id', authenticateToken, paymentController.deletePaymentSchedule)
+router.put('api/payment-schedules/:id', authenticateToken, paymentController.updatePaymentSchedule)
+router.delete('api/payment-schedules/:id', authenticateToken, paymentController.deletePaymentSchedule)
 
 // Maintenance Reports
-router.get('/maintenance', authenticateToken, maintenanceController.getMaintenanceReports)
-router.post('/maintenance', authenticateToken, maintenanceController.createMaintenanceReport)
+router.get('api/maintenance', authenticateToken, maintenanceController.getMaintenanceReports)
+router.post('api/maintenance', authenticateToken, maintenanceController.createMaintenanceReport)
 
 // Expenses
-router.get('/expenses', authenticateToken, expenseController.getExpenses)
-router.post('/expenses', authenticateToken, expenseController.createExpense)
-router.delete('/expenses/:id', authenticateToken, expenseController.deleteExpense)
+router.get('api/expenses', authenticateToken, expenseController.getExpenses)
+router.post('api/expenses', authenticateToken, expenseController.createExpense)
+router.delete('api/expenses/:id', authenticateToken, expenseController.deleteExpense)
 
 
 // Bulk
-router.patch('/bulk/leases', authenticateToken, leaseController.updateManyLeases)
-router.delete('/bulk/leases', authenticateToken, leaseController.deleteManyLeases)
-router.patch('/bulk/payment-schedules', authenticateToken, paymentController.updateManyPaymentSchedules)
-router.delete('/bulk/payment-schedules', authenticateToken, paymentController.deleteManyPaymentSchedules)
-router.post('/bulk/payments', authenticateToken, paymentController.createManyPayments)
-router.patch('/bulk/payments', authenticateToken, paymentController.updateManyPayments)
-router.delete('/bulk/payments', authenticateToken, paymentController.deleteManyPayments)
+router.patch('api/bulk/leases', authenticateToken, leaseController.updateManyLeases)
+router.delete('api/bulk/leases', authenticateToken, leaseController.deleteManyLeases)
+router.patch('api/bulk/payment-schedules', authenticateToken, paymentController.updateManyPaymentSchedules)
+router.delete('api/bulk/payment-schedules', authenticateToken, paymentController.deleteManyPaymentSchedules)
+router.post('api/bulk/payments', authenticateToken, paymentController.createManyPayments)
+router.patch('api/bulk/payments', authenticateToken, paymentController.updateManyPayments)
+router.delete('api/bulk/payments', authenticateToken, paymentController.deleteManyPayments)
 
 //Jobs
 //      Schedule the job to run daily at 00:00 (midnight)
