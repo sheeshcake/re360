@@ -26,7 +26,7 @@ const app = express();
 const router = express.Router();
 app.use(cors());
 app.use(express.json());
-app.use('api', router);
+app.use(router);
 
 
 app.get('/', (req, res) => {
