@@ -17,14 +17,12 @@ import jwt from "jsonwebtoken";
 import {createMessage} from "./controllers/messageController.js";
 import * as maintenanceController from "./controllers/maintenanceController.js";
 import * as expenseController from "./controllers/expenseController.js";
-import ServerlessHttp from 'serverless-http';
 
 
 // eslint-disable-next-line no-undef
 const PORT = process.env.PORT || 3000;
 
 const app = express();
-module.exports.handler = ServerlessHttp(app)
 const router = express.Router();
 app.use(cors());
 app.use(express.json());
