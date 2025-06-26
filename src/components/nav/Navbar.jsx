@@ -125,7 +125,7 @@ const Navbar = ({children}) => {
                 <div>
                     <h3 className="text-primary font-600 flex flex-row justify-center md:justify-start items-center gap-x-1 pt-4 pb-2 ml-0 md:ml-4 md:pl-2 md:mr-2 text-lg whitespace-nowrap">
                         <BiSolidRocket className="w-6 h-6 flex justify-center"/>
-                        <p className="hidden md:flex text-card-foreground ">Realtor Rocket</p>
+                        <p className="hidden md:flex text-card-foreground ">Re360</p>
                     </h3>
                     <nav
                         className="hidden md:flex flex-col mt-5 gap-y-2">
