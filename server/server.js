@@ -28,7 +28,7 @@ module.exports.handler = ServerlessHttp(app)
 const router = express.Router();
 app.use(cors());
 app.use(express.json());
-app.use('/.netlify/functions/api', router);
+app.use('api', router);
 
 
 app.get('/', (req, res) => {
