@@ -1,0 +1,186 @@
+@import '@fontsource-variable/outfit';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+    @apply bg-background;
+    scrollbar-color: var(--foreground) var(--background);
+}
+
+h1 {
+    font-size: 1.75rem;
+    line-height: 2.5rem;
+    font-weight: 500;
+    @apply text-foreground;
+}
+
+h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 500;
+    @apply text-foreground;
+}
+
+h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+    @apply text-foreground;
+}
+
+h4 {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+    @apply text-foreground;
+
+}
+
+select {
+    @apply block;
+    @apply w-full;
+    @apply px-2;
+    @apply py-2;
+    @apply text-foreground;
+    @apply text-base;
+    @apply bg-background-light;
+    @apply border;
+    @apply border-input;
+    @apply rounded-md;
+    @apply shadow-sm;
+    @apply focus:outline-none;
+    @apply sm:text-sm;
+    @apply sm:leading-5;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+input[type="date"] {
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+
+}
+
+
+@layer base {
+    :root {
+        --background: 0 0% 97%;
+        --background-light: 0 0% 100%;
+        --foreground: 240 10% 3.9%;
+        --card: 0 0% 100%;
+        --card-foreground: 240 10% 3.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 240 10% 3.9%;
+        --primary: 221.2 83.2% 53.3%;
+        --primary-foreground: 0 0% 98%;
+        --primary-accent:226 100% 94%;
+        --secondary: 240 4.8% 95.9%;
+        --secondary-foreground: 240 5.9% 10%;
+        --muted: 240 4.8% 95.9%;
+        --muted-foreground: 240 3.8% 46.1%;
+        --accent: 240 4.8% 95.9%;
+        --accent-foreground: 240 5.9% 10%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 0 0% 98%;
+        --border:  240 4.8% 95.9%;
+        --input: 240 5.9% 90%;
+        --ring: 240 5.9% 10%;
+        --radius: 0.5rem;
+
+    }
+
+    .dark {
+        --background: 224 71.4% 4.1%;
+        --background-light: 224 71.4% 5.1%;
+        --foreground: 0 0% 98%;
+        --card: 240 10% 3.9%;
+        --card-foreground: 0 0% 98%;
+        --popover: 224 71.4% 5.1%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 221.2 83.2% 43.3%;
+        /*--primary-foreground:0 0% 98%;*/
+        /*--primary-accent:226 100% 8.7%;*/
+        --secondary: 240 3.7% 15.9%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 240 3.7% 15.9%;
+        --muted-foreground: 240 5% 64.9%;
+        --accent: 240 3.7% 15.9%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 3.7% 15.9%;
+        --input: 240 3.7% 15.9%;
+        --ring: 240 4.9% 83.9%;
+
+        scrollbar-color:  hsl(240 3.7% 35.9%) hsl(224 71.4% 5.1%);
+
+    }
+
+}
+
+
+.maintenance::after {
+  @apply block;
+  @apply w-1;
+  @apply h-1;
+  @apply bg-orange-500;
+  @apply m-1;
+  @apply mx-auto;
+  @apply rounded-full;
+  content: "";
+}
+
+.lease::after {
+  @apply block;
+  @apply w-1;
+  @apply h-1;
+  @apply bg-indigo-600;
+  @apply m-1;
+  @apply mx-auto;
+  @apply rounded-full;
+  content: "";
+}
+
+.rent::after {
+  @apply block;
+  @apply w-1;
+  @apply h-1;
+  @apply bg-emerald-500;
+  @apply m-1;
+  @apply mx-auto;
+  @apply rounded-full;
+  content: "";
+}
+
+.other::after {
+  @apply block;
+  @apply w-1;
+  @apply h-1;
+  @apply bg-gray-500;
+  @apply m-1;
+  @apply mx-auto;
+  @apply rounded-full;
+  content: "";
+}
+
+

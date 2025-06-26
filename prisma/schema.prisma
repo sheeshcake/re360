@@ -1,0 +1,665 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the UserRole enum to distinguish between realtors and tenants.
+enum UserRole {
+  REALTOR
+  TENANT
+  ADMIN
+  GUEST
+}
+
+// Define the AccountStatus enum to track the online status of a user.
+enum AccountStatus {
+  INACTIVE
+  ONLINE
+  OFFLINE
+}
+
+// Define the RealEstateType enum to distinguish between different types of real estate.
+enum RealEstateType {
+  SINGLE_FAMILY_HOME
+  MULTI_FAMILY_HOME
+  CONDO
+  APARTMENT
+  TOWNHOUSE
+  LUXURY
+  OFFICE
+  RETAIL
+  INDUSTRIAL
+  LAND
+  FARM
+}
+
+// Define the ListingStatus enum to track the status of a real estate listing.
+enum ListingStatus {
+  ACTIVE
+  INACTIVE
+  RENTED
+  NOT_RENTED
+  RESERVED
+  SOLD
+  PENDING
+  UNKNOWN
+}
+
+// Define the CurrencyCode enum to track the currency code of a user.
+enum CurrencyCode {
+  USD
+  CAD
+  EUR
+  GBP
+  AUD
+  NZD
+  JPY
+  CNY
+  INR
+  RUB
+  BRL
+  CHF
+  KRW
+  MXN
+  SGD
+  TRY
+  NGN
+  PHP
+  SEK
+  ARS
+  NOK
+  DKK
+  ILS
+  CLP
+  COP
+  ZAR
+  HKD
+  TWD
+  PLN
+  THB
+  IDR
+  HUF
+  CZK
+  AED
+  SAR
+  MYR
+  RON
+  PEN
+  KWD
+  QAR
+  CRC
+  DOP
+  HRK
+  HNL
+  ISK
+  PKR
+  EGP
+  XCD
+  MAD
+  OMR
+  BOB
+  LKR
+  BGN
+  BHD
+  VND
+  UAH
+  IQD
+  JOD
+  BDT
+  KES
+  UYU
+  AZN
+  LBP
+  DZD
+  UZS
+  TND
+  GHS
+  BWP
+  TZS
+  BYN
+  KZT
+  RSD
+  TTD
+  UGX
+  AOA
+  COPPER
+  XAU
+  XAG
+  XPD
+  XPT
+  XDR
+  XOF
+  XPF
+  XAF
+  XFU
+  XBA
+  XBB
+  XBC
+  XBD
+  XTS
+  XXX
+  ZMW
+}
+
+enum CivilStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
+  OTHER
+}
+
+enum LeaseStatus {
+  ACTIVE
+  PENDING
+  EXPIRED
+  TERMINATED
+}
+
+enum PaymentFrequency {
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+  WEEKLY
+}
+
+enum PaymentStatus {
+  PENDING
+  REPORTED
+  PAID
+  CANCELLED
+  REJECTED
+}
+
+enum PaymentScheduleStatus {
+  SCHEDULED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  WAIVED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  tokens    Token[]
+
+  // profile
+  email        String        @unique
+  firstName    String?       @map("first_name")
+  lastName     String?       @map("last_name")
+  name         String?       @default(dbgenerated())
+  dob          DateTime?
+  currencyCode CurrencyCode? @default(USD) @map("currency_code")
+  documents    Document[]
+
+  // credentials
+  password String @map("password")
+  salt     String @map("salt")
+
+  // plaid data
+  plaidLinkToken String? @map("plaid_link_token") // temporary token stored to maintain state across browsers
+
+  // Additional info
+  title   String?
+  avatar  String?       @map("avatar") // profile picture
+  images  Image[]
+  phone   String?
+  website String?
+  company String?
+  bio     String?
+  status  AccountStatus @default(OFFLINE)
+  role    UserRole?     @default(REALTOR)
+
+  // location info
+  street  String?
+  city    String?
+  state   String?
+  zip     String?
+  country String?
+
+  // Define a one-to-many relationship between User and Message.
+  sentMessages     Message[] @relation("sender")
+  receivedMessages Message[] @relation("receiver")
+
+  // Define a one-to-one relationship between User and Realtor.
+  realtor Realtor?
+  tenant  Tenant?
+
+  @@map("user")
+}
+
+model Realtor {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Define a one-to-one relationship between Realtor and User.
+  User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @unique @map("user_id")
+
+  realEstateObjects   RealEstateObject[]
+  maintenanceRequests MaintenanceRequest[]
+  leases              Lease[]
+  expenses            Expense[]
+
+  @@map("realtor")
+}
+
+model Tenant {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Tenant information, visible to Realtors
+  civilStatus CivilStatus? @map("civil_status")
+  occupation  String?
+  income      Float?
+  creditScore Int?         @map("credit_score")
+
+  // Define a one-to-one relationship between Tenant and User.
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int?  @unique @map("user_id")
+
+  // Tenant information, will be overwritten if the Tenant creates User Account
+  firstName String? @map("first_name")
+  lastName  String? @map("last_name")
+  email     String? @unique
+  phone     String?
+
+  leases              Lease[]
+  maintenanceRequests MaintenanceRequest[]
+  rentPayments        RentPayment[]
+  unit                Unit[]
+
+  @@map("tenant")
+}
+
+model Token {
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  type       TokenType
+  emailToken String?   @unique @map("email_token") // Only used for short lived email tokens
+  valid      Boolean   @default(true)
+  expiration DateTime
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  @@map("token")
+}
+
+enum TokenType {
+  API
+  EMAIL
+  PASSWORD_RESET
+  EMAIL_CONFIRMATION
+  EMAIL_CHANGE
+}
+
+// A real estate property
+model RealEstateObject {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Property Details
+  title          String?
+  description    String?
+  lotSize        Float?          @map("lot_size")
+  yearBuilt      Int?            @map("year_built")
+  realEstateType RealEstateType? @map("real_estate_type")
+  marketPrice    Float?          @map("market_price")
+  currency       CurrencyCode?   @default(USD)
+  images         Image[] // Images of the property
+
+  // location info
+  street  String?
+  city    String?
+  state   String?
+  zip     String?
+  country String?
+
+  // Property Specific Amenities
+  amenities AmenitiesOnRealEstate[]
+
+  // Only visible for Realtors/Poster
+  preferences PreferencesOnRealEstate[]
+  documents   Document[]
+
+  realtor   Realtor @relation(fields: [realtorId], references: [id], onDelete: Cascade)
+  realtorId Int     @map("realtor_id")
+
+  // The unit(s) in the real estate object
+  units Unit[]
+
+  @@map("real_estate_object")
+}
+
+enum AmenityCategory {
+  RECREATIONAL
+  TECHNICAL
+  SERVICE
+  SAFETY
+  OTHER
+}
+
+model Amenity {
+  id          Int              @id @default(autoincrement())
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at")
+  name        String           @unique
+  description String?
+  category    AmenityCategory? @map("category")
+
+  realEstateObjects AmenitiesOnRealEstate[]
+
+  @@map("amenity")
+}
+
+model AmenitiesOnRealEstate {
+  amenity   Amenity @relation(fields: [amenityId], references: [id])
+  amenityId Int     @map("amenity_id")
+
+  realEstateObject   RealEstateObject @relation(fields: [realEstateObjectId], references: [id])
+  realEstateObjectId Int              @map("real_estate_object_id")
+
+  assignedAt DateTime @default(now())
+  assignedBy String
+
+  unit   Unit? @relation(fields: [unitId], references: [id])
+  unitId Int?
+
+  @@id([amenityId, realEstateObjectId])
+}
+
+model Preference {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  enabled Boolean?
+
+  realEstateObjects PreferencesOnRealEstate[]
+
+  @@map("preference")
+}
+
+model PreferencesOnRealEstate {
+  preference   Preference @relation(fields: [preferenceId], references: [id])
+  preferenceId Int        @map("preference_id")
+
+  realEstateObject   RealEstateObject @relation(fields: [realEstateObjectId], references: [id])
+  realEstateObjectId Int              @map("real_estate_object_id")
+
+  assignedAt DateTime @default(now())
+  assignedBy String
+
+  @@id([preferenceId, realEstateObjectId])
+}
+
+model Unit {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Identify the unit
+  unitIdentifier String? @map("unit_identifier")
+
+  // Unit details (location)
+  unitNumber String? @map("unit_number")
+  floor      Int?
+
+  // Unit details (specs)
+  unitSize       Float? @map("unit_size")
+  numOfFloors    Int?   @map("num_of_floors")
+  numOfRooms     Int?   @map("num_of_rooms")
+  numOfBedrooms  Int?   @map("num_of_bedrooms")
+  numOfBathrooms Int?   @map("num_of_bathrooms")
+  garages        Int?
+
+  // Unit specific amenities
+  amenities AmenitiesOnRealEstate[]
+
+  // Pricing
+  rentalPrice Float?        @map("rental_price") // Monthly rent
+  currency    CurrencyCode? @default(USD)
+
+  // Status
+  status ListingStatus? @default(ACTIVE)
+
+  // Documents specific to this unit
+  documents Document[]
+
+  // Images of the unit
+  images Image[]
+
+  maintenanceRequests MaintenanceRequest[]
+
+  // Define a many-to-one relationship between Unit and RealEstate.
+  realEstateObject   RealEstateObject @relation(fields: [realEstateObjectId], references: [id], onDelete: Cascade)
+  realEstateObjectId Int              @map("real_estate_object_id")
+
+  // current tenant
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+  tenantId Int?    @map("tenant_id")
+
+  // The lease(s) for the unit (if any, including past leases)
+  leases   Lease[]
+  // The expenses for the unit, e.g. maintenance, repairs, etc.
+  expenses Expense[]
+
+  @@map("unit")
+}
+
+model Lease {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  startDate        DateTime?         @map("start_date")
+  endDate          DateTime?         @map("end_date")
+  rentalPrice      Float?            @map("rental_price") // actual rent
+  status           LeaseStatus?      @default(ACTIVE)
+  paymentFrequency PaymentFrequency? @map("payment_frequency")
+  notes            String?           @map("notes")
+  specialTerms     String?           @map("special_terms")
+  currency         CurrencyCode?     @default(USD)
+
+  totalRentDue Float? @map("total_rent_due") // Total rent due for the lease period
+  rentPaid     Float? @map("rent_paid") // Total rent paid for the lease period
+
+  // Documents specific to this lease
+  documents Document[]
+
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+  tenantId Int?    @map("tenant_id")
+
+  unit   Unit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId Int?  @map("unit_id")
+
+  realtor   Realtor @relation(fields: [realtorId], references: [id], onDelete: Cascade)
+  realtorId Int     @map("realtor_id")
+
+  expenses        Expense[]
+  rentPayments    RentPayment[]
+  paymentSchedule LeasePaymentSchedule[]
+
+  @@map("lease")
+}
+
+model LeasePaymentSchedule {
+  createdAt DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  id        Int                   @id @default(autoincrement())
+  dueDate   DateTime // When the payment for this period is due
+  amountDue Float // Amount due for this period
+  status    PaymentScheduleStatus @default(SCHEDULED)
+  lease     Lease                 @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  leaseId   Int                   @map("lease_id")
+
+  @@map("lease_payment_schedules")
+}
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+  createdAt DateTime @default(now())
+
+  // Define a many-to-one relationship between Image and RealEstate.
+  realEstateObject   RealEstateObject? @relation(fields: [realEstateObjectId], references: [id])
+  realEstateObjectId Int?              @map("real_estate_object_id")
+
+  // Define a many-to-one relationship between Image and Unit.
+  unit   Unit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId Int?  @map("unit_id")
+
+  // define relationship between uploading user and this image
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @map("user_id")
+}
+
+model Document {
+  id           Int          @id @default(autoincrement())
+  documentType DocumentType @map("document_type")
+  filePath     String       @map("file_path")
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @map("user_id")
+
+  realEstateObject   RealEstateObject? @relation(fields: [realEstateObjectId], references: [id])
+  realEstateObjectId Int?              @map("real_estate_object_id")
+
+  lease   Lease? @relation(fields: [leaseId], references: [id])
+  leaseId Int?   @map("lease_id")
+
+  unit   Unit? @relation(fields: [unitId], references: [id])
+  unitId Int?  @map("unit_id")
+
+  @@map("document")
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  content    Json     @map("content")
+  type       String   @map("type") // TEXT, IMAGE, VIDEO, AUDIO, FILE
+  timestamp  DateTime @default(now()) @map("time_stamp") @db.Timestamptz(6)
+  senderId   Int
+  receiverId Int
+  sender     User     @relation("sender", fields: [senderId], references: [id])
+  receiver   User     @relation("receiver", fields: [receiverId], references: [id])
+
+  @@index([senderId, receiverId, timestamp], name: "idx_message_conversation_timestamp")
+  @@map("message")
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MaintenanceStatus {
+  REPORTED
+  OPEN
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model MaintenanceRequest {
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz(6)
+
+  title    String
+  status   MaintenanceStatus?
+  priority Priority?
+  category String? // Maintenance type, e.g. plumbing, electrical, etc.
+  notes    String?
+
+  realtor   Realtor @relation(fields: [realtorId], references: [id], onDelete: Cascade)
+  realtorId Int     @map("realtor_id")
+
+  reporter   Tenant? @relation(fields: [reporterId], references: [id])
+  reporterId Int?    @map("reporter_id")
+
+  unit   Unit? @relation(fields: [unitId], references: [id])
+  unitId Int?  @map("unit_id")
+
+  expenses Expense[]
+
+  @@map("maintenance_request")
+}
+
+model Expense {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  title       String?
+  description String?
+  amount      Float?
+  currency    CurrencyCode? @default(USD)
+  date        DateTime?
+  category    String?
+  status      String?
+  notes       String?
+
+  realtor   Realtor @relation(fields: [realtorId], references: [id], onDelete: Cascade)
+  realtorId Int     @map("realtor_id")
+
+  unit   Unit? @relation(fields: [unitId], references: [id])
+  unitId Int?  @map("unit_id")
+
+  lease   Lease? @relation(fields: [leaseId], references: [id])
+  leaseId Int?   @map("lease_id")
+
+  maintenanceRequest   MaintenanceRequest? @relation(fields: [maintenanceRequestId], references: [id])
+  maintenanceRequestId Int?                @map("maintenance_request_id")
+
+  @@map("expense")
+}
+
+model RentPayment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  amount        Float?
+  currency      CurrencyCode?  @default(USD)
+  date          DateTime?
+  status        PaymentStatus?
+  notes         String?
+  paymentMethod String?        @map("payment_method")
+
+  submittedBy    Int       @map("submitted_by") // UserId of the user who submitted the payment
+  submissionDate DateTime? @map("submission_date")
+  approvalDate   DateTime? @map("approval_date")
+
+  lease   Lease? @relation(fields: [leaseId], references: [id])
+  leaseId Int?   @map("lease_id")
+
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+  tenantId Int?    @map("tenant_id")
+
+  @@map("rent_payment")
+}
+
+enum DocumentType {
+  LEASE
+  APPLICATION
+  OTHER
+  INVOICE
+  REPORT
+}
