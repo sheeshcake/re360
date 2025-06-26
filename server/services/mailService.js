@@ -12,7 +12,7 @@ resend.domains.create({
 export const sendEmail = async (to, subject, html) => {
     try {
         return await resend.emails.send({
-            from: "Realtor Rocket <support@realtorrocket.app>",
+            from: "Re360",
             to: [to],
             subject: subject,
             html: html
